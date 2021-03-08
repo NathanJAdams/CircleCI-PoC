@@ -72,6 +72,11 @@ commands:
 
 jobs:
 # chunks of code run on an executor, see https://circleci.com/docs/2.0/jobs-steps/#jobs-overview
+  no-op:
+    executor: tester
+    resource_class: small
+    steps:
+      - run: echo no-op
   build:
     executor: tester
     resource_class: medium
@@ -129,6 +134,10 @@ jobs:
 workflows:
 # high level tasks performed automatically/scheduled
   version: 2
+  pass:
+    unless: << pipeline.parameters.used >>
+    jobs:
+      - no-op
   test-all:
     when: << pipeline.parameters.used >>
     jobs:
