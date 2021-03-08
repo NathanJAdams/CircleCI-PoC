@@ -1,0 +1,14 @@
+{
+  "name": "root",
+  "private": true,
+  "workspaces": [
+    "modules/**"
+  ],
+  "scripts": {
+    "test:unit": "lerna run test:unit",
+    "prepare": "lerna run --stream --sort prepare"
+  },
+  "devDependencies": {
+    "lerna": "^3.20.2"
+  }
+}
