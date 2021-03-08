@@ -2,13 +2,14 @@
   "name": "root",
   "private": true,
   "workspaces": [
-    "modules/**"
+    "apps/**"
   ],
   "scripts": {
+    "prepare": "lerna run --stream --sort prepare",
     "test:unit": "lerna run test:unit",
-    "prepare": "lerna run --stream --sort prepare"
+    "test:integration": "lerna run test:integration"
   },
   "devDependencies": {
-    "lerna": "^3.20.2"
+    "lerna": "3.20.2"
   }
 }

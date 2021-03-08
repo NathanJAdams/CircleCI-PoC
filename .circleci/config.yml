@@ -1,0 +1,180 @@
+version: 2.1
+
+executors:
+# environment that jobs will run in
+  builder:
+    docker:
+      - image: toodleloo/builder:latest
+        # auth:
+        #   username: ${ECR_USER}
+        #   password: ${ECR_PASSWORD}
+  tester:
+    docker:
+      - image: toodleloo/builder:latest
+  deployer:
+    docker:
+      - image: node:12.20.1-alpine3.12
+
+commands:
+# re-usable code snippets jobs can call
+  install:
+    parameters:
+      prod:
+        type: boolean
+        default: false
+    steps:
+      - when:
+          condition: <<parameters.prod>>
+          steps:
+            - run: yarn --prod
+      - unless:
+          condition: <<parameters.prod>>
+          steps:
+            - run: yarn
+  unit-test:
+    parameters:
+      scope:
+        type: string
+        default: ""
+    steps:
+      - run: yarn test:unit <<parameters.scope>>
+  integration-test:
+    parameters:
+      scope:
+        type: string
+        default: ""
+    steps:
+      - run: yarn test:integration <<parameters.scope>>
+  docker-login:
+    parameters:
+      name:
+        type: string
+      password:
+        type: string
+    steps:
+      - run: docker login -u <<parameters.name>> -p <<parameters.password>>
+  update-image:
+    parameters:
+      folder:
+        type: string
+      name:
+        type: string
+      tag:
+        type: string
+    steps:
+      - run: docker build -t <<parameters.name>>:<<parameters.tag>> <<parameters.folder>>
+      - run: docker push <<parameters.name>>:<<parameters.tag>>
+
+jobs:
+# chunks of code run on an executor, see see https://circleci.com/docs/2.0/jobs-steps/#jobs-overview
+  build:
+    executor: tester
+    resource_class: medium
+    steps:
+      - checkout
+      - install:
+  test:
+    executor: tester
+    resource_class: medium
+    parameters:
+      scope:
+        type: string
+        default: ""
+      unit:
+        type: boolean
+      integration:
+        type: boolean
+    steps:
+      - when:
+          condition: <<parmeters.unit>>
+          steps:
+            - unit-test:
+                scope: <<parameters.scope>>
+      - when:
+          condition: <<parmeters.integration>>
+          steps:
+            - integration-test:
+                scope: <<parameters.scope>>
+  update-all-images:
+    executor: builder
+    resource_class: medium
+    steps:
+      - docker-login:
+          name: $SUPER_SECRET_NAME
+          password: $SUPER_SECRET_PASSWORD
+      - update-image:
+          folder: apps/app-a
+          name: app-a
+          tag: latest
+      - update-image:
+          folder: apps/app-b
+          name: app-b
+          tag: latest
+  deploy:
+    executor: deployer
+    resource_class: medium
+    steps:
+      - run: echo Deploying
+
+workflows:
+# high level tasks performed automatically/manually/scheduled
+  test-on-feature-commit:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: /feature\/.*/
+      - test:
+          filters:
+            branches:
+              only: /feature\/.*/
+          requires:
+            - build
+          parameters:
+            unit: true
+            integration: false
+  test-on-PR-commit:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: /PR-.*/
+      - test:
+          filters:
+            branches:
+              only: /PR-.*/
+          requires:
+            - build
+          parameters:
+            unit: true
+            integration: true
+  incremental-build-images-on-develop-change:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: develop
+      - update-all-images:
+          filters:
+            branches:
+              only: develop
+          requires:
+            - build
+  build-and-deploy-feature:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: /feature\/.*/
+      - update-all-images:
+          filters:
+            branches:
+              only: /feature\/.*/
+          requires:
+            - build
+      - deploy:
+          filters:
+            branches:
+              only: /feature\/.*/
+          requires:
+            - update-all-images
