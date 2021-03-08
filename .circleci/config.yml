@@ -164,8 +164,5 @@ workflows:
               only: master
       - update-all-images:
           context: docker
-          filters:
-            branches:
-              only: master
           requires:
             - build
