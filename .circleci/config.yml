@@ -126,8 +126,9 @@ workflows:
             branches:
               only: /feature\/.*/
       - test:
-          unit: true
-          integration: false
+          parameters:
+            unit: true
+            integration: false
           filters:
             branches:
               only: /feature\/.*/
