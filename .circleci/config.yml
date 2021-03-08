@@ -72,7 +72,7 @@ jobs:
     resource_class: medium
     steps:
       - checkout
-      - install:
+      - install
   test:
     executor: tester
     resource_class: medium
