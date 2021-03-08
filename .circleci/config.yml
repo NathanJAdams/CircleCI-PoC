@@ -118,6 +118,7 @@ jobs:
 
 workflows:
 # high level tasks performed automatically/manually/scheduled
+  version: 2
   test-on-feature-commit:
     jobs:
       - build:
