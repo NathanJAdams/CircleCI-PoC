@@ -114,11 +114,11 @@ jobs:
           password: $SUPER_SECRET_PASSWORD
       - update-image:
           folder: apps/app-multiply
-          image-name: app-multiply
+          image-name: ${SUPER_SECRET_USERNAME}/app-multiply
           tag: latest
       - update-image:
           folder: apps/app-sum
-          image-name: app-sum
+          image-name: ${SUPER_SECRET_USERNAME}/app-sum
           tag: latest
 
 workflows:
