@@ -129,6 +129,15 @@ workflows:
               only: /feature\/.*/
           requires:
             - build
+  noddy:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: /feature\/.*/
+      - unit-test:
+          requires:
+            - build
   test-on-PR-commit:
     jobs:
       - build:
@@ -159,21 +168,3 @@ workflows:
               only: develop
           requires:
             - build
-  build-and-deploy-feature:
-    jobs:
-      - build:
-          filters:
-            branches:
-              only: /feature\/.*/
-      - update-all-images:
-          filters:
-            branches:
-              only: /feature\/.*/
-          requires:
-            - build
-      - deploy:
-          filters:
-            branches:
-              only: /feature\/.*/
-          requires:
-            - update-all-images
