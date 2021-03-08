@@ -130,9 +130,8 @@ workflows:
               only: /feature\/.*/
           requires:
             - build
-          parameters:
-            unit: true
-            integration: false
+          unit: true
+          integration: false
   test-on-PR-commit:
     jobs:
       - build:
@@ -145,9 +144,8 @@ workflows:
               only: /PR-.*/
           requires:
             - build
-          parameters:
-            unit: true
-            integration: true
+          unit: true
+          integration: true
   incremental-build-images-on-develop-change:
     jobs:
       - build:
