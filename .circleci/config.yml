@@ -122,7 +122,7 @@ jobs:
           tag: latest
 
 workflows:
-# high level tasks performed automatically/manually/scheduled
+# high level tasks performed automatically/scheduled
   version: 2
   test-all:
     jobs:
