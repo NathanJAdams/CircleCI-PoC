@@ -66,13 +66,17 @@ commands:
       - run: docker push << parameters.image-name >>:<< parameters.tag >>
 
 jobs:
-# chunks of code run on an executor, see see https://circleci.com/docs/2.0/jobs-steps/#jobs-overview
+# chunks of code run on an executor, see https://circleci.com/docs/2.0/jobs-steps/#jobs-overview
   build:
     executor: tester
     resource_class: medium
     steps:
       - checkout
       - install
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
   unit-test:
     executor: tester
     resource_class: medium
@@ -81,6 +85,8 @@ jobs:
         type: string
         default: ""
     steps:
+      - attach_workspace:
+          at: .
       - unit-test:
           scope: << parameters.scope >>
   integration-test:
@@ -91,12 +97,16 @@ jobs:
         type: string
         default: ""
     steps:
+      - attach_workspace:
+          at: .
       - integration-test:
           scope: << parameters.scope >>
   update-all-images:
     executor: builder
     resource_class: medium
     steps:
+      - attach_workspace:
+          at: .
       - docker-login:
           user-name: $SUPER_SECRET_NAME
           password: $SUPER_SECRET_PASSWORD
@@ -108,11 +118,6 @@ jobs:
           folder: apps/app-b
           image-name: app-b
           tag: latest
-  deploy:
-    executor: deployer
-    resource_class: medium
-    steps:
-      - run: echo Deploying
 
 workflows:
 # high level tasks performed automatically/manually/scheduled
@@ -127,6 +132,15 @@ workflows:
           filters:
             branches:
               only: /feature\/.*/
+          requires:
+            - build
+  noddy:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: /feature\/.*/
+      - unit-test:
           requires:
             - build
   test-on-PR-commit:
@@ -159,21 +173,3 @@ workflows:
               only: develop
           requires:
             - build
-  build-and-deploy-feature:
-    jobs:
-      - build:
-          filters:
-            branches:
-              only: /feature\/.*/
-      - update-all-images:
-          filters:
-            branches:
-              only: /feature\/.*/
-          requires:
-            - build
-      - deploy:
-          filters:
-            branches:
-              only: /feature\/.*/
-          requires:
-            - update-all-images
