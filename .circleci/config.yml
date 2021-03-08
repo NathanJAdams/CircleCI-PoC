@@ -125,13 +125,13 @@ workflows:
             branches:
               only: /feature\/.*/
       - test:
+          unit: true
+          integration: false
           filters:
             branches:
               only: /feature\/.*/
           requires:
             - build
-          unit: true
-          integration: false
   test-on-PR-commit:
     jobs:
       - build:
@@ -139,13 +139,13 @@ workflows:
             branches:
               only: /PR-.*/
       - test:
+          unit: true
+          integration: true
           filters:
             branches:
               only: /PR-.*/
           requires:
             - build
-          unit: true
-          integration: true
   incremental-build-images-on-develop-change:
     jobs:
       - build:
