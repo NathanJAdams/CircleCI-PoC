@@ -24,11 +24,11 @@ commands:
         default: false
     steps:
       - when:
-          condition: <<parameters.prod>>
+          condition: << parameters.prod >>
           steps:
             - run: yarn --prod
       - unless:
-          condition: <<parameters.prod>>
+          condition: << parameters.prod >>
           steps:
             - run: yarn
   unit-test:
@@ -37,14 +37,14 @@ commands:
         type: string
         default: ""
     steps:
-      - run: yarn test:unit <<parameters.scope>>
+      - run: yarn test:unit << parameters.scope >>
   integration-test:
     parameters:
       scope:
         type: string
         default: ""
     steps:
-      - run: yarn test:integration <<parameters.scope>>
+      - run: yarn test:integration << parameters.scope >>
   docker-login:
     parameters:
       user-name:
@@ -52,7 +52,7 @@ commands:
       password:
         type: string
     steps:
-      - run: docker login -u <<parameters.user-name>> -p <<parameters.password>>
+      - run: docker login -u << parameters.user-name >> -p << parameters.password >>
   update-image:
     parameters:
       folder:
@@ -62,8 +62,8 @@ commands:
       tag:
         type: string
     steps:
-      - run: docker build -t <<parameters.image-name>>:<<parameters.tag>> <<parameters.folder>>
-      - run: docker push <<parameters.image-name>>:<<parameters.tag>>
+      - run: docker build -t << parameters.image-name >>:<< parameters.tag >> << parameters.folder >>
+      - run: docker push << parameters.image-name >>:<< parameters.tag >>
 
 jobs:
 # chunks of code run on an executor, see see https://circleci.com/docs/2.0/jobs-steps/#jobs-overview
@@ -86,15 +86,15 @@ jobs:
         type: boolean
     steps:
       - when:
-          condition: <<parmeters.unit>>
+          condition: << parmeters.unit >>
           steps:
             - unit-test:
-                scope: <<parameters.scope>>
+                scope: << parameters.scope >>
       - when:
-          condition: <<parmeters.integration>>
+          condition: << parmeters.integration >>
           steps:
             - integration-test:
-                scope: <<parameters.scope>>
+                scope: << parameters.scope >>
   update-all-images:
     executor: builder
     resource_class: medium
