@@ -136,8 +136,6 @@ workflows:
   version: 2
   pass:
     unless: << pipeline.parameters.used >>
-    jobs:
-      - no-op
   test-all:
     when: << pipeline.parameters.used >>
     jobs:
