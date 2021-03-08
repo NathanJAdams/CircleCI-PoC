@@ -155,6 +155,12 @@ workflows:
       - unit-test:
           requires:
             - build
+      - integration-test:
+          filters:
+            branches:
+              only: /feature\/integration.*/
+          requires:
+            - build
   incremental-build-images-on-develop-change:
     when: << pipeline.parameters.used >>
     jobs:
