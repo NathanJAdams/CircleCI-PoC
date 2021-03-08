@@ -112,6 +112,9 @@ jobs:
       - docker-login:
           user-name: $SUPER_SECRET_USERNAME
           password: $SUPER_SECRET_PASSWORD
+      - run: ls -la
+      - run: ls apps/ -la
+      - run: ls apps/app-a -la
       - update-image:
           folder: apps/app-a
           image-name: app-a
