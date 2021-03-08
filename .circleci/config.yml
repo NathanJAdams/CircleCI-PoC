@@ -3,7 +3,7 @@ version: 2.1
 parameters:
   used:
     type: boolean
-    default: false
+    default: true
 
 executors:
 # environment that jobs will run in
