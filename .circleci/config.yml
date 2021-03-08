@@ -108,7 +108,7 @@ jobs:
       - attach_workspace:
           at: .
       - docker-login:
-          user-name: $SUPER_SECRET_NAME
+          user-name: $SUPER_SECRET_USERNAME
           password: $SUPER_SECRET_PASSWORD
       - update-image:
           folder: apps/app-a
@@ -142,10 +142,11 @@ workflows:
       - build:
           filters:
             branches:
-              only: develop
+              only: master
       - update-all-images:
+          context: docker
           filters:
             branches:
-              only: develop
+              only: master
           requires:
             - build
