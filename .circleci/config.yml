@@ -47,12 +47,12 @@ commands:
       - run: yarn test:integration <<parameters.scope>>
   docker-login:
     parameters:
-      name:
+      user-name:
         type: string
       password:
         type: string
     steps:
-      - run: docker login -u <<parameters.name>> -p <<parameters.password>>
+      - run: docker login -u <<parameters.user-name>> -p <<parameters.password>>
   update-image:
     parameters:
       folder:
@@ -100,7 +100,7 @@ jobs:
     resource_class: medium
     steps:
       - docker-login:
-          name: $SUPER_SECRET_NAME
+          user-name: $SUPER_SECRET_NAME
           password: $SUPER_SECRET_PASSWORD
       - update-image:
           folder: apps/app-a
