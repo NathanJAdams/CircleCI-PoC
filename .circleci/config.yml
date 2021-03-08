@@ -77,6 +77,11 @@ jobs:
     resource_class: small
     steps:
       - run: echo no-op
+  hello:
+    executor: tester
+    resource_class: small
+    steps:
+      - run: echo hello
   build:
     executor: tester
     resource_class: medium
@@ -134,17 +139,14 @@ jobs:
 workflows:
 # high level tasks performed automatically/scheduled
   version: 2
-  pass:
+  no-op:
     unless: << pipeline.parameters.used >>
     jobs:
       - no-op
-  test-all:
+  run-all:
     when: << pipeline.parameters.used >>
     jobs:
-      - build
-      - unit-test:
-          requires:
-            - build
+      - hello
   test-features:
     when: << pipeline.parameters.used >>
     jobs:
