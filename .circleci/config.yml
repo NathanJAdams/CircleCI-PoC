@@ -73,28 +73,26 @@ jobs:
     steps:
       - checkout
       - install
-  test:
+  unit-test:
     executor: tester
     resource_class: medium
     parameters:
       scope:
         type: string
         default: ""
-      unit:
-        type: boolean
-      integration:
-        type: boolean
     steps:
-      - when:
-          condition: << parmeters.unit >>
-          steps:
-            - unit-test:
-                scope: << parameters.scope >>
-      - when:
-          condition: << parmeters.integration >>
-          steps:
-            - integration-test:
-                scope: << parameters.scope >>
+      - unit-test:
+          scope: << parameters.scope >>
+  integration-test:
+    executor: tester
+    resource_class: medium
+    parameters:
+      scope:
+        type: string
+        default: ""
+    steps:
+      - integration-test:
+          scope: << parameters.scope >>
   update-all-images:
     executor: builder
     resource_class: medium
@@ -125,9 +123,7 @@ workflows:
           filters:
             branches:
               only: /feature\/.*/
-      - test:
-          unit: true
-          integration: false
+      - unit-test:
           filters:
             branches:
               only: /feature\/.*/
@@ -139,9 +135,13 @@ workflows:
           filters:
             branches:
               only: /PR-.*/
-      - test:
-          unit: true
-          integration: true
+      - unit-test:
+          filters:
+            branches:
+              only: /PR-.*/
+          requires:
+            - build
+      - integration-test:
           filters:
             branches:
               only: /PR-.*/
