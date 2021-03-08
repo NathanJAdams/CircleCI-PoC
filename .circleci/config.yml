@@ -1,5 +1,10 @@
 version: 2.1
 
+parameters:
+  used:
+    type: boolean
+    default: false
+
 executors:
 # environment that jobs will run in
   builder:
@@ -125,12 +130,14 @@ workflows:
 # high level tasks performed automatically/scheduled
   version: 2
   test-all:
+    when: << pipeline.parameters.used >>
     jobs:
       - build
       - unit-test:
           requires:
             - build
   test-features:
+    when: << pipeline.parameters.used >>
     jobs:
       - build:
           filters:
@@ -140,6 +147,7 @@ workflows:
           requires:
             - build
   incremental-build-images-on-develop-change:
+    when: << pipeline.parameters.used >>
     jobs:
       - build:
           filters:
