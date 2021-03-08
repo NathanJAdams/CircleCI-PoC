@@ -102,7 +102,8 @@ jobs:
       - integration-test:
           scope: << parameters.scope >>
   update-all-images:
-    executor: builder
+    docker:
+      - image: circleci/golang:1.15
     resource_class: medium
     steps:
       - attach_workspace:
