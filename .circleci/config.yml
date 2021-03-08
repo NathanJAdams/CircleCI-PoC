@@ -77,11 +77,11 @@ jobs:
     resource_class: small
     steps:
       - run: echo no-op
-  hello:
+  run-all:
     executor: tester
     resource_class: small
     steps:
-      - run: echo hello
+      - run: echo run-all
   build:
     executor: tester
     resource_class: medium
@@ -146,7 +146,7 @@ workflows:
   run-all:
     when: << pipeline.parameters.used >>
     jobs:
-      - hello
+      - run-all
   test-features:
     when: << pipeline.parameters.used >>
     jobs:
