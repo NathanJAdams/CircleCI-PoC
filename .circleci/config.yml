@@ -122,43 +122,19 @@ jobs:
 workflows:
 # high level tasks performed automatically/manually/scheduled
   version: 2
-  test-on-feature-commit:
+  test-all:
+    jobs:
+      - build
+      - unit-test:
+          requires:
+            - build
+  test-features:
     jobs:
       - build:
           filters:
             branches:
               only: /feature\/.*/
       - unit-test:
-          filters:
-            branches:
-              only: /feature\/.*/
-          requires:
-            - build
-  noddy:
-    jobs:
-      - build:
-          filters:
-            branches:
-              only: /feature\/.*/
-      - unit-test:
-          requires:
-            - build
-  test-on-PR-commit:
-    jobs:
-      - build:
-          filters:
-            branches:
-              only: /PR-.*/
-      - unit-test:
-          filters:
-            branches:
-              only: /PR-.*/
-          requires:
-            - build
-      - integration-test:
-          filters:
-            branches:
-              only: /PR-.*/
           requires:
             - build
   incremental-build-images-on-develop-change:
