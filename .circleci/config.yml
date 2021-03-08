@@ -57,13 +57,13 @@ commands:
     parameters:
       folder:
         type: string
-      name:
+      image-name:
         type: string
       tag:
         type: string
     steps:
-      - run: docker build -t <<parameters.name>>:<<parameters.tag>> <<parameters.folder>>
-      - run: docker push <<parameters.name>>:<<parameters.tag>>
+      - run: docker build -t <<parameters.image-name>>:<<parameters.tag>> <<parameters.folder>>
+      - run: docker push <<parameters.image-name>>:<<parameters.tag>>
 
 jobs:
 # chunks of code run on an executor, see see https://circleci.com/docs/2.0/jobs-steps/#jobs-overview
@@ -104,11 +104,11 @@ jobs:
           password: $SUPER_SECRET_PASSWORD
       - update-image:
           folder: apps/app-a
-          name: app-a
+          image-name: app-a
           tag: latest
       - update-image:
           folder: apps/app-b
-          name: app-b
+          image-name: app-b
           tag: latest
   deploy:
     executor: deployer
