@@ -1,4 +1,4 @@
-const sum = (...a: Number[]): Number => a.reduce((prev: Number, curr: Number) => prev.valueOf() + curr.valueOf());
+const sum = (a: Number, b: Number): Number => a.valueOf() + b.valueOf();
 
 export {
     sum
