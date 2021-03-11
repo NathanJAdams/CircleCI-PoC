@@ -100,8 +100,9 @@ workflows:
       - build:
           filters:
             branches:
-              - ignore: master
-              - ignore: develop
+              ignore:
+                - master
+                - develop
       - unit-test:
           requires:
             - build
