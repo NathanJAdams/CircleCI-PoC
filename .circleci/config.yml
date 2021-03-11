@@ -11,14 +11,8 @@ executors:
     docker:
       - image: toodleloo/builder:latest
         # auth:
-        #   username: ${ECR_USER}
-        #   password: ${ECR_PASSWORD}
-  tester:
-    docker:
-      - image: toodleloo/builder:latest
-  deployer:
-    docker:
-      - image: node:12.20.1-alpine3.12
+        #   username: $ECR_USER
+        #   password: $ECR_PASSWORD
 
 commands:
 # re-usable code snippets jobs can call
@@ -36,55 +30,28 @@ commands:
           condition: << parameters.prod >>
           steps:
             - run: yarn
-  unit-test:
-    parameters:
-      scope:
-        type: string
-        default: ""
+  allow-develop-diffs:
+  # allows git diffs with develop
     steps:
-      - run: yarn test:unit << parameters.scope >>
-  integration-test:
-    parameters:
-      scope:
-        type: string
-        default: ""
-    steps:
-      - run: yarn test:integration << parameters.scope >>
-  docker-login:
-    parameters:
-      user-name:
-        type: string
-      password:
-        type: string
-    steps:
-      - run: docker login -u << parameters.user-name >> -p << parameters.password >>
-  update-image:
-    parameters:
-      folder:
-        type: string
-      image-name:
-        type: string
-      tag:
-        type: string
-    steps:
-      - run: docker build -t << parameters.image-name >>:<< parameters.tag >> << parameters.folder >>
-      - run: docker push << parameters.image-name >>:<< parameters.tag >>
+      - run: |
+          COMMIT_ID=$(git rev-parse HEAD)
+          git checkout develop
+          git checkout $COMMIT_ID
 
 jobs:
 # chunks of code run on an executor, see https://circleci.com/docs/2.0/jobs-steps/#jobs-overview
   no-op:
-    executor: tester
+    executor: builder
     resource_class: small
     steps:
       - run: echo no-op
   run-all:
-    executor: tester
+    executor: builder
     resource_class: small
     steps:
       - run: echo run-all
   build:
-    executor: tester
-    resource_class: medium
+    executor: builder
     steps:
       - checkout
       - install
@@ -93,51 +60,31 @@ jobs:
           paths:
             - .
   unit-test:
-    executor: tester
-    resource_class: medium
-    parameters:
-      scope:
-        type: string
-        default: ""
+    executor: builder
     steps:
       - attach_workspace:
           at: .
-      - unit-test:
-          scope: << parameters.scope >>
-  integration-test:
-    executor: tester
-    resource_class: medium
-    parameters:
-      scope:
-        type: string
-        default: ""
-    steps:
-      - attach_workspace:
-          at: .
-      - integration-test:
-          scope: << parameters.scope >>
-  update-all-images:
-    docker:
-      - image: circleci/golang:1.15
-    resource_class: medium
+      - allow-develop-diffs
+      - run: |
+          scope=$(./build-scripts/get-packages-to-test.sh)
+          scopeArgs=$(printf %s "${scope[@]/#/ --scope }")
+          [ ! "$scopeArgs" = "" ] && yarn test:unit $scope
+  build-image:
+    executor: builder
     steps:
       - attach_workspace:
           at: .
       - setup_remote_docker
-      - docker-login:
-          user-name: $SUPER_SECRET_USERNAME
-          password: $SUPER_SECRET_PASSWORD
-      - update-image:
-          folder: apps/app-multiply
-          image-name: ${SUPER_SECRET_USERNAME}/app-multiply
-          tag: latest
-      - update-image:
-          folder: apps/app-sum
-          image-name: ${SUPER_SECRET_USERNAME}/app-sum
-          tag: latest
+      - run: docker build -t app-sum:latest apps/app-sum
+  show-images:
+    executor: builder
+    steps:
+#      - setup_remote_docker
+      - run: docker images
 
 workflows:
 # high level tasks performed automatically/scheduled
+# every workflow will run on every commit unless filtered by branch
   version: 2
   no-op:
     unless: << pipeline.parameters.used >>
@@ -147,30 +94,24 @@ workflows:
     when: << pipeline.parameters.used >>
     jobs:
       - run-all
-  test-features:
-    when: << pipeline.parameters.used >>
+  test:
+    unless: << pipeline.parameters.used >>
     jobs:
       - build:
           filters:
             branches:
-              only: /feature\/.*/
+              - ignore: master
+              - ignore: develop
       - unit-test:
           requires:
             - build
-      - integration-test:
-          filters:
-            branches:
-              only: /feature\/integration.*/
-          requires:
-            - build
-  incremental-build-images-on-develop-change:
+  images-test:
     when: << pipeline.parameters.used >>
     jobs:
-      - build:
-          filters:
-            branches:
-              only: master
-      - update-all-images:
-          context: docker
+      - build
+      - build-image:
           requires:
             - build
+      - show-images:
+          requires:
+            - build-image
