@@ -79,7 +79,7 @@ jobs:
   show-images:
     executor: builder
     steps:
-#      - setup_remote_docker
+      - setup_remote_docker
       - run: docker images
 
 workflows:
