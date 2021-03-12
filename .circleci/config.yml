@@ -123,16 +123,16 @@ workflows:
                 - master
                 - develop
       - build-push-image-aws:
-          requires:
-            - build
-          context: docker
           folder: apps/app-sum
           name: app-sum
           tag: latest
-      - build-push-image-aws:
           requires:
             - build
           context: docker
+      - build-push-image-aws:
           folder: apps/app-multiply
           name: app-multiply
           tag: latest
+          requires:
+            - build
+          context: docker
