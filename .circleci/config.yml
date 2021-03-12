@@ -104,7 +104,7 @@ workflows:
 # every workflow will run on every commit unless filtered by branch
   version: 2
   test:
-    unless: << pipeline.parameters.used >>
+    when: << pipeline.parameters.used >>
     jobs:
       - build:
           filters:
