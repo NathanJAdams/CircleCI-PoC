@@ -81,7 +81,7 @@ jobs:
     parameters:
       folder:
         type: string
-      short_name:
+      short-name:
         type: string
       tag:
         type: string
@@ -92,10 +92,10 @@ jobs:
       - setup_remote_docker
       - docker-login-aws
       - ensure-repository-aws:
-          repository: $short_name
+          repository: <<parameters.short-name>>
       - run: |
-          full_name=$AWS_ECR_ACCOUNT_URL/$short_name:$tag
-          docker build -t $full_name $folder
+          full_name=$AWS_ECR_ACCOUNT_URL/<<parameters.short-name>>:<<parameters.tag>>
+          docker build -t $full_name <<parameters.folder>>
           docker push $full_name
 
 workflows:
@@ -125,14 +125,14 @@ workflows:
                 - develop
       - build-push-image-aws:
           folder: apps/app-sum
-          short_name: app-sum
+          short-name: app-sum
           tag: latest
           requires:
             - build
           context: docker
       - build-push-image-aws:
           folder: apps/app-multiply
-          short_name: app-multiply
+          short-name: app-multiply
           tag: latest
           requires:
             - build
