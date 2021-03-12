@@ -54,7 +54,8 @@ commands:
           || aws ecr create-repository \
             --region $AWS_REGION \
             --repository-name <<parameters.repository>> \
-            --image-scanning-configuration scanOnPush=true
+            --image-scanning-configuration scanOnPush=true \
+            --image-tag-mutability IMMUTABLE
 
 jobs:
 # chunks of code run on an executor, see https://circleci.com/docs/2.0/jobs-steps/#jobs-overview
