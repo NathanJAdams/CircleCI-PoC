@@ -45,6 +45,7 @@ commands:
       repository:
         type: string
     steps:
+      - run: echo <<parameters.repository>>
       - run: |
           aws ecr describe-repositories \
             --region $AWS_REGION \
