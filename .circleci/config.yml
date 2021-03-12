@@ -80,7 +80,7 @@ jobs:
     parameters:
       folder:
         type: string
-      name:
+      image-name:
         type: string
       tag:
         type: string
@@ -91,9 +91,9 @@ jobs:
       - setup_remote_docker
       - docker-login-aws
       - ensure-repository-aws:
-          repository: $name
+          repository: ${image-name}
       - run: |
-          image=$AWS_ECR_ACCOUNT_URL/$name:$tag
+          image=$AWS_ECR_ACCOUNT_URL/${image-name}:$tag
           docker build -t $image $folder
           docker push $image
 
@@ -124,14 +124,14 @@ workflows:
                 - develop
       - build-push-image-aws:
           folder: apps/app-sum
-          name: app-sum
+          image-name: app-sum
           tag: latest
           requires:
             - build
           context: docker
       - build-push-image-aws:
           folder: apps/app-multiply
-          name: app-multiply
+          image-name: app-multiply
           tag: latest
           requires:
             - build
