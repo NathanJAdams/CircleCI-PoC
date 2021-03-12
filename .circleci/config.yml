@@ -92,7 +92,7 @@ jobs:
       - setup_remote_docker
       - docker-login-aws
       - ensure-repository-aws:
-          repository: <<parameters.short-name>>
+          repository: $AWS_NAMESPACE/<<parameters.short-name>>
       - run: |
           full_name=$AWS_ECR_ACCOUNT_URL/$AWS_NAMESPACE/<<parameters.short-name>>:<<parameters.tag>>
           docker build -t $full_name <<parameters.folder>>
