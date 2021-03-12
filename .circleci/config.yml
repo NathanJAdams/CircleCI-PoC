@@ -43,16 +43,6 @@ commands:
 
 jobs:
 # chunks of code run on an executor, see https://circleci.com/docs/2.0/jobs-steps/#jobs-overview
-  no-op:
-    executor: builder
-    resource_class: small
-    steps:
-      - run: echo no-op
-  run-all:
-    executor: builder
-    resource_class: small
-    steps:
-      - run: echo run-all
   build:
     executor: builder
     steps:
@@ -88,14 +78,6 @@ workflows:
 # high level tasks performed automatically/scheduled
 # every workflow will run on every commit unless filtered by branch
   version: 2
-  no-op:
-    unless: << pipeline.parameters.used >>
-    jobs:
-      - no-op
-  run-all:
-    when: << pipeline.parameters.used >>
-    jobs:
-      - run-all
   test:
     unless: << pipeline.parameters.used >>
     jobs:
@@ -120,3 +102,4 @@ workflows:
       - build-push-image:
           requires:
             - build
+          context: docker
