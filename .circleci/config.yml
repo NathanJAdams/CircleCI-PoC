@@ -37,6 +37,9 @@ commands:
           COMMIT_ID=$(git rev-parse HEAD)
           git checkout develop
           git checkout $COMMIT_ID
+  docker-login:
+    steps:
+      - run: aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ECR_ACCOUNT_URL
 
 jobs:
 # chunks of code run on an executor, see https://circleci.com/docs/2.0/jobs-steps/#jobs-overview
@@ -69,18 +72,17 @@ jobs:
           scope=$(./build-scripts/get-packages-to-test.sh)
           scopeArgs=$(printf %s "${scope[@]/#/ --scope }")
           [ ! "$scopeArgs" = "" ] && yarn test:unit $scope
-  build-image:
+  build-push-image:
     executor: builder
     steps:
       - attach_workspace:
           at: .
       - setup_remote_docker
-      - run: docker build -t app-sum:latest apps/app-sum
-  show-images:
-    executor: builder
-    steps:
-      - setup_remote_docker
-      - run: docker images
+      - docker-login
+      - run: |
+          image=$AWS_ECR_ACCOUNT_URL/app-sum:latest
+          docker build -t $image apps/app-sum
+          docker push $image
 
 workflows:
 # high level tasks performed automatically/scheduled
@@ -106,13 +108,15 @@ workflows:
       - unit-test:
           requires:
             - build
-  images-test:
+  build-push-images:
     when: << pipeline.parameters.used >>
     jobs:
-      - build
-      - build-image:
+      - build:
+          filters:
+            branches:
+              only:
+                - master
+                - develop
+      - build-push-image:
           requires:
             - build
-      - show-images:
-          requires:
-            - build-image
